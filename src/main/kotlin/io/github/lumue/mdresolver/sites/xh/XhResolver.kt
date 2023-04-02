@@ -122,15 +122,21 @@ private val Document.ldJsonString: String
 
 private val XhVideoPage.InitialsJson.VideoModel.actors: Set<MovieMetadata.Actor>
     get() {
+        if(categories==null)
+            return setOf()
+
         return categories
-                .filter { category -> category.name != null && category.url != null }
-                .filter { category -> category.pornstar }
-                .map { category -> MovieMetadata.Actor(category.url!!, category.name!!) }
-                .toCollection(mutableSetOf())
+            .filter { category -> category.name != null && category.url != null }
+            .filter { category -> category.pornstar }
+            .map { category -> MovieMetadata.Actor(category.url!!, category.name!!) }
+            .toCollection(mutableSetOf())
     }
 
 private val XhVideoPage.InitialsJson.VideoModel.tags: Set<Tag>
     get() {
+
+        if(categories==null)
+            return setOf()
         return categories
                 .filter { category -> category.name != null && category.url != null }
                 .filter { category -> !category.pornstar }

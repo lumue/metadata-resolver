@@ -24,7 +24,6 @@ data class XhVideoPage(
     data class InitialsJson(
             @JsonProperty("visitFavorite") val visitFavorite: Boolean = false,
             @JsonProperty("videoModel") val videoModel: VideoModel=VideoModel(),
-            @JsonProperty("commentsCollection") val commentsCollection: List<CommentsCollection> = listOf(),
             @JsonProperty("xplayerSettings") val xplayerSettings: JsonNode? = null,
             @JsonProperty("xplayerPluginSettings") val xplayerPluginSettings: JsonNode? = null,
             @JsonProperty("isVideoViewDurationNeeded") val isVideoViewDurationNeeded: Boolean = false,
@@ -51,63 +50,20 @@ data class XhVideoPage(
     ) {
 
 
-        @JsonIgnoreProperties(ignoreUnknown = true)
-        data class NotificationsModel(
-                @JsonProperty("gifts") val gifts: Int = 0,
-                @JsonProperty("messages") val messages: Int = 0,
-                @JsonProperty("friends") val friends: Int = 0,
-                @JsonProperty("notifications") val notifications: Int = 0
-        )
+
 
         @JsonIgnoreProperties(ignoreUnknown = true)
         data class CommentsCollection(
                 @JsonProperty("modelName") val modelName: String = "",
-                @JsonProperty("id") val id: Int = 0,
-                @JsonProperty("userId") val userId: Int = 0,
-                @JsonProperty("itemId") val itemId: Int = 0,
+                @JsonProperty("id") val id:  String = "",
+                @JsonProperty("userId") val userId:  String = "",
+                @JsonProperty("itemId") val itemId:  String = "",
                 @JsonProperty("text") val text: String = "",
-                @JsonProperty("created") val created: Int = 0,
+                @JsonProperty("created") val created:  String = "",
                 @JsonProperty("metaItemprop") val metaItemprop: Boolean = false,
-                @JsonProperty("author") val author: Author? = Author(),
                 @JsonProperty("replyTo") val replyTo: JsonNode? = null
 
         ) {
-            @JsonIgnoreProperties(ignoreUnknown = true)
-            data class Author(
-                    @JsonProperty("lastActive") val lastActive: Any? = Any(),
-                    @JsonProperty("editable") val editable: Boolean = false,
-                    @JsonProperty("vip") val vip: Boolean = false,
-                    @JsonProperty("personalInfo") val personalInfo: PersonalInfo? = PersonalInfo(),
-                    @JsonProperty("modelName") val modelName: String = "",
-                    @JsonProperty("thumbURL") val thumbURL: String? = "",
-                    @JsonProperty("isOnline") val isOnline: Boolean = false,
-                    @JsonProperty("id") val id: Int = 0,
-                    @JsonProperty("pageURL") val pageURL: String? = "",
-                    @JsonProperty("retired") val retired: Boolean = false,
-                    @JsonProperty("verified") val verified: Boolean = false,
-                    @JsonProperty("name") val name: String = ""
-            ) {
-                @JsonIgnoreProperties(ignoreUnknown = true)
-                data class PersonalInfo(
-                        @JsonProperty("gender") val gender: Gender? = Gender(),
-                        @JsonProperty("orientation") val orientation: Any? = Any(),
-                        @JsonProperty("geo") val geo: Geo? = Geo(),
-                        @JsonProperty("birthday") val birthday: Long = 0
-                ) {
-                    @JsonIgnoreProperties(ignoreUnknown = true)
-                    data class Gender(
-                            @JsonProperty("name") val name: String? = "",
-                            @JsonProperty("icon") val icon: String? = "",
-                            @JsonProperty("label") val label: String? = ""
-                    )
-
-                    @JsonIgnoreProperties(ignoreUnknown = true)
-                    data class Geo(
-                            @JsonProperty("countryCode") val countryCode: String? = "",
-                            @JsonProperty("countryName") val countryName: String? = ""
-                    )
-                }
-            }
         }
 
         @JsonIgnoreProperties(ignoreUnknown = true)
@@ -230,12 +186,10 @@ data class XhVideoPage(
                 @JsonProperty("spriteCount") val spriteCount: Int = 0,
                 @JsonProperty("sources") val sources: Sources = Sources(),
                 @JsonProperty("dimensions") val dimensions: JsonNode? = null,
-                @JsonProperty("categories") val categories: List<Category> = listOf(),
+                @JsonProperty("categories",required=false,defaultValue="[]")  val categories: List<Category>? = listOf(),
                 @JsonProperty("sponsor") val sponsor: JsonNode? = null,
                 @JsonProperty("reported") val reported: Boolean = false,
-                @JsonProperty("editable") val editable: Boolean = false,
-                @JsonProperty("subscriptionModel") val subscriptionModel: SubscriptionModel = SubscriptionModel(),
-                @JsonProperty("author") val author: Author = Author()
+                @JsonProperty("editable") val editable: Boolean = false
         ) {
 
 
@@ -273,24 +227,6 @@ data class XhVideoPage(
             )
 
 
-            @JsonIgnoreProperties(ignoreUnknown = true)
-            data class SubscriptionModel(
-                    @JsonProperty("modelName") val modelName: String = "",
-                    @JsonProperty("id") val id: Int = 0,
-                    @JsonProperty("subscribed") val subscribed: Boolean = false,
-                    @JsonProperty("subscribers") val subscribers: Int = 0
-            )
-
-
-            @JsonIgnoreProperties(ignoreUnknown = true)
-            data class Author(
-                    @JsonProperty("modelName") val modelName: String = "",
-                    @JsonProperty("id") val id: Int = 0,
-                    @JsonProperty("pageURL") val pageURL: String = "",
-                    @JsonProperty("retired") val retired: Boolean = false,
-                    @JsonProperty("verified") val verified: Boolean = false,
-                    @JsonProperty("name") val name: String = ""
-            )
 
 
         }

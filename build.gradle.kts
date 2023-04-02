@@ -33,10 +33,13 @@ dependencies {
     implementation("org.jsoup:jsoup:1.15.4")
     implementation("org.slf4j:slf4j-api:1.7.10")
     implementation("org.apache.httpcomponents:httpclient:4.5.14")
+    implementation("org.apache.httpcomponents.core5:httpcore5:5.2.1")
+    implementation("org.apache.httpcomponents.client5:httpclient5:5.2.1")
     implementation("ru.gildor.coroutines:kotlin-coroutines-retrofit:1.1.0")
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.14.2")
     implementation("org.springdoc:springdoc-openapi-ui:1.6.15")
-
+    implementation ("org.seleniumhq.selenium:selenium-java:4.6.0")
+    implementation("io.github.bonigarcia:webdrivermanager:5.3.2")
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation(kotlin("test"))

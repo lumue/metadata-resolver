@@ -2,9 +2,11 @@ package io.github.lumue.mdresolver.sites
 
 import kotlinx.coroutines.*
 import org.apache.http.Header
-import org.apache.http.HttpStatus
 import org.apache.http.client.CookieStore
+import org.apache.http.client.HttpRequestRetryHandler
+import org.apache.http.client.config.RequestConfig
 import org.apache.http.client.methods.HttpGet
+import org.apache.http.conn.ConnectTimeoutException
 import org.apache.http.impl.client.BasicCookieStore
 import org.apache.http.impl.client.CloseableHttpClient
 import org.apache.http.impl.client.HttpClientBuilder
@@ -34,11 +36,30 @@ abstract class BasicHttpClient(val password: String = "",
 }
 
 ) {
-    val logger = LoggerFactory.getLogger(BasicHttpClient::class.java)!!
 
+    private val logger = LoggerFactory.getLogger(BasicHttpClient::class.java)!!
+
+    private val retryHandler = HttpRequestRetryHandler { exception, executionCount, context ->
+        // 3 retries at max
+        if (executionCount > 5) {
+            return@HttpRequestRetryHandler false
+        } else {
+            // wait a second before retrying again
+            Thread.sleep(1000)
+            return@HttpRequestRetryHandler true
+        }
+    }
 
     protected val httpClientBuilder: HttpClientBuilder = HttpClientBuilder.create()
-            .setDefaultCookieStore(cookieStore)
+        .setDefaultCookieStore(cookieStore)
+        .setDefaultRequestConfig(
+            RequestConfig.custom()
+                .setConnectTimeout(10000)
+                .setSocketTimeout(10000)
+                .setConnectionRequestTimeout(10000)
+                .build()
+        )
+        .setRetryHandler(retryHandler);
             
 
     val loggedIn: Boolean
@@ -101,20 +122,9 @@ abstract class BasicHttpClient(val password: String = "",
 
     suspend fun CloseableHttpClient.getContentAsString(url: String, additionalHeaders: Map<String, String> = mapOf()): String {
         return suspendCancellableCoroutine {
+            var result:String
             try {
-                val result=
-                        this.use { httpClient ->
-                            val get = HttpGet(url)
-                            get.addHeaders(additionalHeaders)
-                            get.addHeaders(contentAsStringRequestHeaders)
-                            httpClient.execute(get).use{ response ->
-                                if (response.statusLine.statusCode != 200)
-                                    throw RuntimeException("http error : ${response.statusLine}")
-                                val out = ByteArrayOutputStream()
-                                response.entity.writeTo(out)
-                                String(out.toByteArray(), Charset.forName("UTF-8"))
-                            }
-                        }
+                result=requestPageContent(url.replace("https://","http://"), additionalHeaders)
                 it.resume(result)
             }
             catch (e:Throwable){
@@ -124,6 +134,23 @@ abstract class BasicHttpClient(val password: String = "",
         }
     }
 
+    private fun CloseableHttpClient.requestPageContent(
+        url: String,
+        additionalHeaders: Map<String, String>
+    ): String {
+        this.use { httpClient ->
+            val get = HttpGet(url)
+            get.addHeaders(additionalHeaders)
+            get.addHeaders(contentAsStringRequestHeaders)
+            return httpClient.execute(get).use { response ->
+                if (response.statusLine.statusCode != 200)
+                    throw RuntimeException("http error : ${response.statusLine}")
+                val out = ByteArrayOutputStream()
+                response.entity.writeTo(out)
+                String(out.toByteArray(), Charset.forName("UTF-8"))
+            }
+        }
+    }
 
 
 }

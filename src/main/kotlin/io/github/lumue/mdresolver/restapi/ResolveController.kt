@@ -16,18 +16,6 @@ class ResolveController (
 
 
     @RequestMapping(
-            path = ["/"],
-            method = [RequestMethod.GET],
-            produces = ["application/json; charset=utf-8"]
-    )
-    fun resolveMetadataforUrlInBody(@RequestBody url:String): ResponseEntity<MovieMetadata> {
-        val result   = runBlocking {
-            resolveMetadataService.resolveForUrl(url)
-        }
-        return ResponseEntity.ok(result)
-    }
-
-    @RequestMapping(
             path = ["/resolve"],
             method = [RequestMethod.GET],
             produces = ["application/json; charset=utf-8"]

@@ -4,112 +4,9 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.github.lumue.mdresolver.core.MovieMetadata
-import io.github.lumue.mdresolver.core.MovieMetadataResolver
 import io.github.lumue.mdresolver.core.ResolveException
 import io.github.lumue.mdresolver.core.Tag
-import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
-import org.slf4j.LoggerFactory
-import org.springframework.stereotype.Component
-import javax.script.Invocable
-import javax.script.ScriptEngineManager
-
-@Component
-class PhResolver : MovieMetadataResolver {
-
-    val httpClient=PhHttpClient()
-    private val logger = LoggerFactory.getLogger(this.javaClass.name)
-
-    override fun canResolveForUrl(url: String) : Boolean{
-        return url.contains("pornhub")
-    }
-
-    override suspend fun resolveMetadata(url: String): MovieMetadata {
-        logger.debug("resolving metadata for location $url")
-        val pageDocument = loadVideoPageDocument(url)
-        val page=PhVideoPage(pageDocument)
-
-        return page.contentMetadata
-    }
-
-
-    private suspend fun loadVideoPageDocument(url: String, headers: Map<String,String> = mapOf()): Document {
-        val contentAsString = httpClient.getContentAsString(url)
-        val document = Jsoup.parse(contentAsString)
-        if(document.isPhVideoPage())
-            return document
-        else if (document.isRnCookiePage())
-        {
-            logger.warn("need rncookie. trying to calculate one from returned page.")
-            val page=RnCookiePage(document)
-            val calculatedKey = page.rnKeyScript.calculatedKey
-            httpClient.addCookie("RNKEY", calculatedKey,"*.pornhub.com")
-            logger.warn("rncookie evaluated to $calculatedKey. setting as RNKEY cookie")
-            return loadVideoPageDocument(url, mapOf("Cookie" to "RNKEY=$calculatedKey"))
-        }
-
-        throw ResolveException("Document ${url} does not seem to be a pornhub page")
-
-    }
-
-
-}
-
-class RnCookiePage(document: Document) {
-
-    val rnKeyScript by lazy { document.extractRnKeyJavascript() }
-
-    init {
-        if(!document.isRnCookiePage())
-            throw ResolveException("Document ${document.pretty} does not seem to be a pornhub rncookie page")
-    }
-
-
-}
-
-private fun Document.extractRnKeyJavascript(): RnKeyJavascript {
-    return RnKeyJavascript(
-            select("head")
-                    .select("script").first().dataNodes().first().wholeData
-                    .replace("<!--","")
-                    .replace("-->","")
-    )
-}
-
-class RnKeyJavascript(val source :String) {
-
-    val calculatedKey by lazy { calculateKey() }
-
-    val generatedSource by lazy { generateSource() }
-
-    val invocableJavaScript by lazy { evaluateGeneratedSource() }
-
-    private fun evaluateGeneratedSource(): Invocable {
-        val scriptEngine = ScriptEngineManager().getEngineByName("nashorn")
-        scriptEngine.eval(generatedSource)
-        return scriptEngine as Invocable
-    }
-
-    private fun generateSource(): String {
-        return source
-                .replace("document.location.reload(true);","")
-                .replace("document.cookie = \"RNKEY=","return \"")
-                .replace("document.cookie=\"RNKEY=","return \"")
-    }
-
-    private fun calculateKey(): String {
-        return invocableJavaScript.invokeFunction("go") as String
-    }
-
-}
-
-private fun Document.isRnCookiePage(): Boolean {
-    val attr = select("body").attr("onload")
-    return attr!=null&&attr==("go()")
-}
-
-private fun Document.isPhVideoPage() = select("#player").isNotEmpty()
-
 
 class PhVideoPage(val document: Document){
 
@@ -123,19 +20,17 @@ class PhVideoPage(val document: Document){
     val contentMetadata by lazy { document.extractMovieMetadata() }
 }
 
-private val Document.pretty: String
+val Document.pretty: String
     get() {
         outputSettings().prettyPrint(true)
         return html()
     }
 
-
-
 private fun Document.extractPlayerJson(): PlayerJson {
     val playerDiv = select("#player")
     val scriptElements = playerDiv.select("script")
     val scriptElement = scriptElements.first()
-    val playerScript = scriptElement.dataNodes().first().wholeData
+    val playerScript = scriptElement!!.dataNodes().first().wholeData
     val from=playerScript.indexOfFirst { c -> '{' == c}
     val to=playerScript.indexOf("};")+1
     val jsonString=playerScript.substring(from,to)
@@ -146,15 +41,14 @@ private fun Document.extractPlayerJson(): PlayerJson {
     }
 }
 
-
 private fun Document.extractMovieMetadata(): MovieMetadata {
     return MovieMetadata(
-            title = extractTitle(),
-            description = extractDescription(),
-            source = "pornhub",
-            tags = extractTags(),
-            actors = extractActors(),
-            resolution = 0
+        title = extractTitle(),
+        description = extractDescription(),
+        source = "pornhub",
+        tags = extractTags(),
+        actors = extractActors(),
+        resolution = 0
     )
 }
 
@@ -295,4 +189,9 @@ private data class PlayerJson(
     )
 }
 
+fun Document.isRnCookiePage(): Boolean {
+    val attr = select("body").attr("onload")
+    return attr!=null&&attr==("go()")
+}
 
+fun Document.isPhVideoPage() = select("#player").isNotEmpty()

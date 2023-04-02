@@ -3,16 +3,33 @@ package io.github.lumue.mdresolver.sites.ph
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.Arguments
+import org.junit.jupiter.params.provider.MethodSource
+import java.util.stream.Stream
 
 class PhResolverE2E {
 
-    @Test
-    fun should_resolve_movie_metadata_for_url(){
+
+    @ParameterizedTest(name = "resolveMetadata should return MovieMetadata for {0}")
+    @MethodSource("provideUrls")
+    fun should_resolve_movie_metadata(url:String) {
         runBlocking {
-            val resolver = PhResolver()
-            val movieMetadata=resolver.resolveMetadata("https://de.pornhub.com/view_video.php?viewkey=ph5ef8728c23d34")
+            val resolver = SeleniumPhResolver()
+            val movieMetadata =
+                resolver.resolveMetadata(url)
             println(movieMetadata)
             Assertions.assertNotNull(movieMetadata)
+            resolver.close()
+        }
+    }
+
+    companion object {
+        @JvmStatic
+        fun provideUrls(): Stream<Arguments> {
+            return Stream.of(
+                Arguments.of("https://de.pornhub.com/view_video.php?viewkey=63fc6e9814a82")
+                )
         }
     }
 
