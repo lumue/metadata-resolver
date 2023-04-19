@@ -6,7 +6,6 @@ import org.apache.http.client.CookieStore
 import org.apache.http.client.HttpRequestRetryHandler
 import org.apache.http.client.config.RequestConfig
 import org.apache.http.client.methods.HttpGet
-import org.apache.http.conn.ConnectTimeoutException
 import org.apache.http.impl.client.BasicCookieStore
 import org.apache.http.impl.client.CloseableHttpClient
 import org.apache.http.impl.client.HttpClientBuilder
@@ -15,6 +14,11 @@ import org.apache.http.message.BasicHeader
 import org.slf4j.LoggerFactory
 import java.io.ByteArrayOutputStream
 import java.nio.charset.Charset
+import java.text.DateFormat
+import java.time.LocalDate
+import java.time.ZoneOffset
+import java.time.format.DateTimeFormatter
+import java.util.*
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.coroutines.resume
@@ -24,17 +28,16 @@ private val contentAsStringRequestHeaders: Map<String, String> = mapOf(
         "cache-control" to "no-cache",
         "content-type" to "text/html; charset=utf-8",
         "pragma" to "no-cache",
-        "user-agent" to "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.77 Safari/537.36"
+        "user-agent" to "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.77 Safari/537.36",
+        "cookie" to "accessAgeDisclaimerPH=1; platform=pc"
 )
 
-abstract class BasicHttpClient(val password: String = "",
-                           val username: String = "",
-                           private val cookieStore: CookieStore = BasicCookieStore(),
-                           val performLoginHttpCall: (p: String, u: String, hc: CloseableHttpClient) -> Any=fun(_: String, _: String, _: CloseableHttpClient) {},
-                           val hasAuthenticatedUserCall: (cs: CookieStore)->Boolean= fun (_: CookieStore) : Boolean{
-    return true
-}
-
+abstract class BasicHttpClient(
+    val password: String = "",
+    val username: String = "",
+    private val cookieStore: CookieStore = BasicCookieStore(),
+    val performLoginHttpCall: (p: String, u: String, hc: CloseableHttpClient) -> Any=fun(_: String, _: String, _: CloseableHttpClient) {},
+    val hasAuthenticatedUserCall: (cs: CookieStore)->Boolean= fun (_: CookieStore) : Boolean{  return true}
 ) {
 
     private val logger = LoggerFactory.getLogger(BasicHttpClient::class.java)!!
@@ -70,7 +73,7 @@ abstract class BasicHttpClient(val password: String = "",
 
 
     val loggingIn: AtomicBoolean = AtomicBoolean(false)
-    suspend fun getContentAsString(url: String,additionalHeaders: Map<String,String> = mapOf()): String {
+    open suspend fun getContentAsString(urlAsString: String, additionalHeaders: Map<String,String> = mapOf()): String {
 
         if (!username.isEmpty() && !loggedIn)
             login()
@@ -78,7 +81,7 @@ abstract class BasicHttpClient(val password: String = "",
 
         val httpClient = httpClientBuilder.build()
 
-        return httpClient.getContentAsString(url,additionalHeaders )
+        return httpClient.getContentAsString(urlAsString,additionalHeaders )
 
     }
 
@@ -113,6 +116,8 @@ abstract class BasicHttpClient(val password: String = "",
     fun addCookie( name: String, value: String, domain: String) {
         val basicClientCookie = BasicClientCookie(name, value)
         basicClientCookie.domain=domain
+        basicClientCookie.path="/"
+        basicClientCookie.expiryDate=Date(LocalDate.now().atStartOfDay().plusDays(365).toEpochSecond(ZoneOffset.UTC))
         cookieStore.addCookie(basicClientCookie)
     }
 
@@ -121,10 +126,11 @@ abstract class BasicHttpClient(val password: String = "",
 
 
     suspend fun CloseableHttpClient.getContentAsString(url: String, additionalHeaders: Map<String, String> = mapOf()): String {
+
         return suspendCancellableCoroutine {
             var result:String
             try {
-                result=requestPageContent(url.replace("https://","http://"), additionalHeaders)
+                result=requestPageContent(url, additionalHeaders)
                 it.resume(result)
             }
             catch (e:Throwable){

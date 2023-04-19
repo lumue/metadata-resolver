@@ -15,12 +15,13 @@ class PhResolverE2E {
     @MethodSource("provideUrls")
     fun should_resolve_movie_metadata(url:String) {
         runBlocking {
-            val resolver = SeleniumPhResolver()
-            val movieMetadata =
-                resolver.resolveMetadata(url)
-            println(movieMetadata)
-            Assertions.assertNotNull(movieMetadata)
-            resolver.close()
+            val resolver = PhResolver()
+            for(i in 1..10) {
+                val movieMetadata =
+                    resolver.resolveMetadata(url)
+                println(movieMetadata)
+                Assertions.assertNotNull(movieMetadata)
+            }
         }
     }
 
@@ -28,7 +29,7 @@ class PhResolverE2E {
         @JvmStatic
         fun provideUrls(): Stream<Arguments> {
             return Stream.of(
-                Arguments.of("https://de.pornhub.com/view_video.php?viewkey=63fc6e9814a82")
+                Arguments.of("https://www.pornhub.com/view_video.php?viewkey=63fc6e9814a82")
                 )
         }
     }

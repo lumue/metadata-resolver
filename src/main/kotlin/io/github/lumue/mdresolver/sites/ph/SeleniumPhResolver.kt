@@ -1,23 +1,18 @@
 package io.github.lumue.mdresolver.sites.ph
 
-import io.github.bonigarcia.wdm.WebDriverManager
 import io.github.lumue.mdresolver.core.MovieMetadata
 import io.github.lumue.mdresolver.core.MovieMetadataResolver
 import jakarta.annotation.PreDestroy
 import org.jsoup.Jsoup
 import org.openqa.selenium.By
-import org.openqa.selenium.Cookie
 import org.openqa.selenium.Keys
 import org.openqa.selenium.WebDriver
-import org.openqa.selenium.chrome.ChromeDriver
 import org.openqa.selenium.chrome.ChromeOptions
-import org.openqa.selenium.support.ui.ExpectedConditions
+import org.openqa.selenium.remote.RemoteWebDriver
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import java.io.Closeable
-import java.text.SimpleDateFormat
-import java.time.format.DateTimeFormatter
-import java.util.*
+import java.net.URL
 import kotlin.properties.Delegates
 
 @Component
@@ -30,10 +25,10 @@ class SeleniumPhResolver() : MovieMetadataResolver, Closeable {
 
 
     init {
-        WebDriverManager.chromedriver().setup()
+
         val options = ChromeOptions()
         options.addArguments("--remote-allow-origins=*", "--headless")
-        driver = ChromeDriver(options)
+        driver = RemoteWebDriver(URL("http://vm-services-home:4444"),options)
         driver.startPornhubSessiond()
     }
 
