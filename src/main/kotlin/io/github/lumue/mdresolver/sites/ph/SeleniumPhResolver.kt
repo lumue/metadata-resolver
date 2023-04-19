@@ -15,7 +15,7 @@ import java.io.Closeable
 import java.net.URL
 import kotlin.properties.Delegates
 
-@Component
+
 class SeleniumPhResolver() : MovieMetadataResolver, Closeable {
 
 
