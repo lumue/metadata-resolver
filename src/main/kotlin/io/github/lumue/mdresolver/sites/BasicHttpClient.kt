@@ -1,7 +1,7 @@
 package io.github.lumue.mdresolver.sites
 
-import kotlinx.coroutines.*
-import org.apache.http.Header
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.suspendCancellableCoroutine
 import org.apache.http.client.CookieStore
 import org.apache.http.client.HttpRequestRetryHandler
 import org.apache.http.client.config.RequestConfig
@@ -14,10 +14,8 @@ import org.apache.http.message.BasicHeader
 import org.slf4j.LoggerFactory
 import java.io.ByteArrayOutputStream
 import java.nio.charset.Charset
-import java.text.DateFormat
 import java.time.LocalDate
 import java.time.ZoneOffset
-import java.time.format.DateTimeFormatter
 import java.util.*
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
@@ -42,7 +40,7 @@ abstract class BasicHttpClient(
 
     private val logger = LoggerFactory.getLogger(BasicHttpClient::class.java)!!
 
-    private val retryHandler = HttpRequestRetryHandler { exception, executionCount, context ->
+    private val retryHandler = HttpRequestRetryHandler { _, executionCount, _ ->
         // 3 retries at max
         if (executionCount > 5) {
             return@HttpRequestRetryHandler false
@@ -53,7 +51,7 @@ abstract class BasicHttpClient(
         }
     }
 
-    protected val httpClientBuilder: HttpClientBuilder = HttpClientBuilder.create()
+    private val httpClientBuilder: HttpClientBuilder = HttpClientBuilder.create()
         .setDefaultCookieStore(cookieStore)
         .setDefaultRequestConfig(
             RequestConfig.custom()
@@ -62,20 +60,20 @@ abstract class BasicHttpClient(
                 .setConnectionRequestTimeout(10000)
                 .build()
         )
-        .setRetryHandler(retryHandler);
-            
+        .setRetryHandler(retryHandler)
 
-    val loggedIn: Boolean
+
+    private val loggedIn: Boolean
         get():Boolean {
             return hasAuthenticatedUserCall(cookieStore)
         }
 
 
 
-    val loggingIn: AtomicBoolean = AtomicBoolean(false)
+    private val loggingIn: AtomicBoolean = AtomicBoolean(false)
     open suspend fun getContentAsString(urlAsString: String, additionalHeaders: Map<String,String> = mapOf()): String {
 
-        if (!username.isEmpty() && !loggedIn)
+        if (username.isNotEmpty() && !loggedIn)
             login()
 
 
@@ -85,7 +83,7 @@ abstract class BasicHttpClient(
 
     }
 
-    suspend fun login() {
+    private suspend fun login() {
 
         while (!loggingIn.compareAndSet(false, true)) {
             logger.debug("login already started. waiting...")
@@ -125,10 +123,10 @@ abstract class BasicHttpClient(
 
 
 
-    suspend fun CloseableHttpClient.getContentAsString(url: String, additionalHeaders: Map<String, String> = mapOf()): String {
+    private suspend fun CloseableHttpClient.getContentAsString(url: String, additionalHeaders: Map<String, String> = mapOf()): String {
 
         return suspendCancellableCoroutine {
-            var result:String
+            val result:String
             try {
                 result=requestPageContent(url, additionalHeaders)
                 it.resume(result)
@@ -168,37 +166,11 @@ fun HttpGet.addHeaders(headers: Map<String,String>){
 }
 
 
-private var HttpGet.resumeAt: Long
-    get() {
-        val rangeHeader = findResumeAtRangeHeader()
-        return if(rangeHeader!=null) {
-            rangeHeader.value
-                    .removeSuffix("-")
-                    .removePrefix("bytes=")
-                    .toLong()
-        }
-        else
-            0L
-    }
-    set(value) {
-        val header = findResumeAtRangeHeader()
-        if(header !=null)
-            removeHeader(header)
-        if(value>0)
-            addHeader("Range", "bytes=$value-")
-    }
-
-private fun HttpGet.findResumeAtRangeHeader(): Header? {
-    return getHeaders("Range")
-            .filter { header -> header.value.startsWith("bytes=") && header.value.endsWith("-") }
-            .firstOrNull()
-}
-
 fun CookieStore.names(): List<String> {
     val cookienames = mutableListOf<String>()
-    cookies.forEach({
+    cookies.forEach {
         cookienames.add(it.name)
-    })
+    }
     return cookienames
 }
 
