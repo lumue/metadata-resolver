@@ -28,7 +28,7 @@ private val contentAsStringRequestHeaders: Map<String, String> = mapOf(
         "cache-control" to "no-cache",
         "content-type" to "text/html; charset=utf-8",
         "pragma" to "no-cache",
-        "user-agent" to "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.77 Safari/537.36",
+        "user-agent" to "Mozilla/5.0 (X11; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/114.0",
         "cookie" to "accessAgeDisclaimerPH=1; platform=pc"
 )
 
