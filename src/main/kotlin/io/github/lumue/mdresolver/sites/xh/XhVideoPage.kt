@@ -259,7 +259,7 @@ data class XhVideoPage(
             uploader=  videoTags
                 ?.filter {t-> t.attr("href").contains("/channels")}
                 ?.map { t-> t.text() }
-                ?.first(),
+                ?.firstOrNull(),
             downloaded = LocalDateTime.now(),
             source = "xhamster",
             sourceURL = this.metaTags.filter { t-> t.attr("property").equals("og:url") }.map { t->t.attr("content") }.first(),
