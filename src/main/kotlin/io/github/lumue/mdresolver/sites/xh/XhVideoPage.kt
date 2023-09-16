@@ -256,9 +256,13 @@ data class XhVideoPage(
             duration = Duration.ofSeconds(this.initialsJson.videoModel.duration),
             views = this.initialsJson.videoModel.views,
             uploaded = LocalDateTime.ofEpochSecond(this.initialsJson.videoModel.created, 0, ZoneOffset.UTC),
+            uploader=  videoTags
+                .filter {t-> t.attr("href").contains("/channels")}
+                .map { t-> t.text() }
+                .first(),
             downloaded = LocalDateTime.now(),
             source = "xhamster",
-            sourceURL = this.initialsJson.staticURL,
+            sourceURL = this.metaTags.filter { t-> t.attr("property").equals("og:url") }.map { t->t.attr("content") }.first(),
             votes = this.initialsJson.videoModel.rating?.likes,
             resolution = 0
         )
