@@ -10,7 +10,7 @@ class XhResolverE2E {
     fun should_resolve_movie_metadata_for_url(){
         runBlocking {
             val resolver = XhResolver()
-            val movieMetadata=resolver.resolveMetadata("https://xhamster.com/videos/father-from-best-girlfriend-seduced-daughter-teen-13483323")
+            val movieMetadata=resolver.resolveMetadata("https://ge.xhamster.com/videos/erotic-cinema-3-xhucgED")
             println(movieMetadata)
             Assertions.assertNotNull(movieMetadata)
         }

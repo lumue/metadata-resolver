@@ -27,7 +27,8 @@ private val contentAsStringRequestHeaders: Map<String, String> = mapOf(
         "content-type" to "text/html; charset=utf-8",
         "pragma" to "no-cache",
         "user-agent" to "Mozilla/5.0 (X11; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/114.0",
-        "cookie" to "accessAgeDisclaimerPH=1; platform=pc"
+        "cookie" to "accessAgeDisclaimerPH=1; platform=pc",
+        "Accept-Language" to "en-US;q=0.7,en;q=0.3"
 )
 
 abstract class BasicHttpClient(

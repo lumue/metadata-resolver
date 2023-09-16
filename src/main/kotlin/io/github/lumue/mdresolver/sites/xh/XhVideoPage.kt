@@ -3,11 +3,20 @@ package io.github.lumue.mdresolver.sites.xh
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.databind.JsonNode
+import io.github.lumue.mdresolver.core.MovieMetadata
+import io.github.lumue.mdresolver.core.Tag
+import org.jsoup.nodes.Element
+import java.time.Duration
+import java.time.LocalDateTime
+import java.time.ZoneOffset
+import java.util.function.Predicate
 
 
 data class XhVideoPage(
         val ldJson : LdJson=LdJson(),
-        val initialsJson: InitialsJson= InitialsJson()
+        val initialsJson: InitialsJson= InitialsJson(),
+    val metaTags: List<Element> ,
+    val videoTags: List<Element>
 ){
 
     @JsonIgnoreProperties(ignoreUnknown = true)
@@ -232,7 +241,61 @@ data class XhVideoPage(
         }
     }
 
-
+    internal fun extractContentMetadata(): MovieMetadata {
+        return MovieMetadata(
+            this.initialsJson.videoModel.title ?: "",
+            description = this.initialsJson.videoModel.description,
+            tags = videoTags
+                .filter {t-> t.attr("href").contains("/categories")}
+                .map { t-> Tag(t.attr("href"),t.text().trim())}
+                .toSet(),
+            actors = videoTags
+                    .filter {t-> t.attr("href").contains("/pornstars")}
+                .map { t-> MovieMetadata.Actor(t.attr("href"), t.text().trim()) }
+                .toSet(),
+            duration = Duration.ofSeconds(this.initialsJson.videoModel.duration),
+            views = this.initialsJson.videoModel.views,
+            uploaded = LocalDateTime.ofEpochSecond(this.initialsJson.videoModel.created, 0, ZoneOffset.UTC),
+            downloaded = LocalDateTime.now(),
+            source = "xhamster",
+            sourceURL = this.initialsJson.staticURL,
+            votes = this.initialsJson.videoModel.rating?.likes,
+            resolution = 0
+        )
 
 
 }
+
+    private val LdJson.Video.tags: Set<Tag>
+        get() {
+            return keywords!!
+                .filter { k-> k.isNotEmpty() }
+                .map { k -> Tag("xhamster-$k", k) }
+                .toCollection(mutableSetOf())
+        }
+
+    private val InitialsJson.VideoModel.actors: Set<MovieMetadata.Actor>
+        get() {
+            if(categories==null)
+                return setOf()
+
+            return categories
+                .filter { category -> category.name != null && category.url != null }
+                .filter { category -> category.pornstar }
+                .map { category -> MovieMetadata.Actor(category.url!!, category.name!!) }
+                .toCollection(mutableSetOf())
+        }
+    private val InitialsJson.VideoModel.tags: Set<Tag>
+        get() {
+
+            if(categories==null)
+                return setOf()
+            return categories
+                .filter { category -> category.name != null && category.url != null }
+                .filter { category -> !category.pornstar }
+                .map { category -> Tag(category.url!!, category.name!!) }
+                .toCollection(mutableSetOf())
+        }
+
+}
+
