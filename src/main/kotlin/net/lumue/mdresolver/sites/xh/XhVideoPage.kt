@@ -9,9 +9,8 @@ import org.jsoup.nodes.Element
 import java.time.Duration
 import java.time.LocalDateTime
 import java.time.ZoneOffset
-import java.util.function.Predicate
 
-
+@Suppress("unused")
 data class XhVideoPage(
     val ldJson : LdJson = LdJson(),
     val initialsJson: InitialsJson = InitialsJson(),
@@ -57,36 +56,6 @@ data class XhVideoPage(
         @JsonProperty("gaSettings") val gaSettings: GaSettings? = GaSettings(),
         @JsonProperty("staticURL") val staticURL: String = "",
     ) {
-
-
-
-
-        @JsonIgnoreProperties(ignoreUnknown = true)
-        data class CommentsCollection(
-                @JsonProperty("modelName") val modelName: String = "",
-                @JsonProperty("id") val id:  String = "",
-                @JsonProperty("userId") val userId:  String = "",
-                @JsonProperty("itemId") val itemId:  String = "",
-                @JsonProperty("text") val text: String = "",
-                @JsonProperty("created") val created:  String = "",
-                @JsonProperty("metaItemprop") val metaItemprop: Boolean = false,
-                @JsonProperty("replyTo") val replyTo: JsonNode? = null
-
-        ) {
-        }
-
-        @JsonIgnoreProperties(ignoreUnknown = true)
-        data class RelatedVideosPagination(
-                @JsonProperty("active") val active: Int = 0,
-                @JsonProperty("next") val next: Int = 0,
-                @JsonProperty("prev") val prev: Int = 0,
-                @JsonProperty("buttonClass") val buttonClass: String = "",
-                @JsonProperty("minPage") val minPage: Int = 0,
-                @JsonProperty("maxPage") val maxPage: Int = 0,
-                @JsonProperty("maxPages") val maxPages: Int = 0,
-                @JsonProperty("pageLinkTemplate") val pageLinkTemplate: String = "",
-                @JsonProperty("pageLinkFirst") val pageLinkFirst: String = ""
-        )
 
 
         @JsonIgnoreProperties(ignoreUnknown = true)
@@ -256,13 +225,13 @@ data class XhVideoPage(
             duration = Duration.ofSeconds(this.initialsJson.videoModel.duration),
             views = this.initialsJson.videoModel.views,
             uploaded = LocalDateTime.ofEpochSecond(this.initialsJson.videoModel.created, 0, ZoneOffset.UTC),
-            uploader=  videoTags
-                ?.filter {t-> t.attr("href").contains("/channels")}
-                ?.map { t-> t.text() }
-                ?.firstOrNull(),
+            uploader= videoTags
+                .filter { t-> t.attr("href").contains("/channels")}
+                .map { t-> t.text() }
+                .firstOrNull(),
             downloaded = LocalDateTime.now(),
             source = "xhamster",
-            sourceURL = this.metaTags.filter { t-> t.attr("property").equals("og:url") }.map { t->t.attr("content") }.first(),
+            sourceURL = this.metaTags.filter { t-> t.attr("property") == "og:url" }.map { t->t.attr("content") }.first(),
             votes = this.initialsJson.videoModel.rating?.likes,
             resolution = 0
         )

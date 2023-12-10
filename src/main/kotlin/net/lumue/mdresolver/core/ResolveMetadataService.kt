@@ -15,7 +15,7 @@ class ResolveMetadataService(
     }
 
     private fun findResolver(url: String): MovieMetadataResolver {
-        val matchedResolver = resolvers.filter { r -> r.canResolveForUrl(url) }.firstOrNull()
+        val matchedResolver = resolvers.firstOrNull{ r -> r.canResolveForUrl(url) }
         if(matchedResolver==null)
             throw NoResolverFound("no resolver found for "+url)
         return matchedResolver

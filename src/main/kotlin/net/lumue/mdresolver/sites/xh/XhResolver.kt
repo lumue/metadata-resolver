@@ -26,7 +26,7 @@ class XhResolver : MovieMetadataResolver {
         val htmlAsString=xhHttpClient.getContentAsString(sanitizedurl)
         val page=xhVideoPageParser.fromHtml(htmlAsString)
 
-       return page.extractContentMetadata();
+       return page.extractContentMetadata()
     }
 
     override fun canResolveForUrl(url: String):Boolean {
@@ -68,7 +68,7 @@ class XhVideoModelParser {
         get():String {
             val scriptString = run {
                 //2. Parses and scrapes the HTML response
-                select("#initials-script") ?.first()
+                select("#initials-script").first()
                     ?.dataNodes()
                     ?.first()
                     ?.wholeData
@@ -82,7 +82,7 @@ class XhVideoModelParser {
             val scriptString = run {
                 //2. Parses and scrapes the HTML response
                 getElementsByAttributeValue("type", "application/ld+json")
-                    ?.first()
+                    .first()
                     ?.dataNodes()
                     ?.first()
                     ?.wholeData

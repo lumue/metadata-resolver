@@ -7,7 +7,6 @@ import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
-import java.net.URL
 
 @Component
 class PhResolver : MovieMetadataResolver {
@@ -29,7 +28,7 @@ class PhResolver : MovieMetadataResolver {
     }
 
 
-    private suspend fun loadVideoPageDocument(urlString: String, headers: Map<String,String> = mapOf()): Document {
+    private suspend fun loadVideoPageDocument(urlString: String): Document {
         val document=Jsoup
             .connect(urlString)
             .cookie("accessAgeDisclaimerPH", "1")
@@ -44,7 +43,7 @@ class PhResolver : MovieMetadataResolver {
             val calculatedKey = page.rnKeyScript.calculatedKey
             httpClient.addCookie("RNKEY", calculatedKey,"*.pornhub.com")
             logger.warn("rncookie evaluated to $calculatedKey. setting as RNKEY cookie")
-            return loadVideoPageDocument(urlString, mapOf("cookie" to "platform=pc; accessAgeDisclaimerPH=1; RNKEY=$calculatedKey"))
+            return loadVideoPageDocument(urlString)
         }
 
         throw ResolveException("Document ${urlString} does not seem to be a pornhub page")

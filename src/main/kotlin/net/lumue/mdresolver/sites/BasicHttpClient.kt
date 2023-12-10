@@ -43,12 +43,12 @@ abstract class BasicHttpClient(
 
     private val retryHandler = HttpRequestRetryHandler { _, executionCount, _ ->
         // 3 retries at max
-        if (executionCount > 5) {
-            return@HttpRequestRetryHandler false
+        return@HttpRequestRetryHandler if (executionCount > 5) {
+            false
         } else {
             // wait a second before retrying again
             Thread.sleep(1000)
-            return@HttpRequestRetryHandler true
+            true
         }
     }
 
