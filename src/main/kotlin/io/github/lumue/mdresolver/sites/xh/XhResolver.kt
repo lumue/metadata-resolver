@@ -23,6 +23,7 @@ class XhResolver : MovieMetadataResolver {
     override suspend fun resolveMetadata(url: String): MovieMetadata {
         logger.debug("resolving metadata for location $url")
         val sanitizedurl = url.replace("//de.", "//").replace("//ge.","//")
+        xhHttpClient.addCookie("lang","en",".xhamster.com")
         val htmlAsString=xhHttpClient.getContentAsString(sanitizedurl)
         val page=xhVideoPageParser.fromHtml(htmlAsString)
 

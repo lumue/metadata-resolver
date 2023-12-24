@@ -37,15 +37,15 @@ class PhResolver : MovieMetadataResolver {
             .get()
         if(document.isPhVideoPage())
             return document
-        else if (document.isRnCookiePage())
-        {
-            logger.warn("need rncookie. trying to calculate one from returned page.")
-            val page=RnCookiePage(document)
-            val calculatedKey = page.rnKeyScript.calculatedKey
-            httpClient.addCookie("RNKEY", calculatedKey,"*.pornhub.com")
-            logger.warn("rncookie evaluated to $calculatedKey. setting as RNKEY cookie")
-            return loadVideoPageDocument(urlString, mapOf("cookie" to "platform=pc; accessAgeDisclaimerPH=1; RNKEY=$calculatedKey"))
-        }
+//        else if (document.isRnCookiePage())
+//        {
+//            logger.warn("need rncookie. trying to calculate one from returned page.")
+//            val page=RnCookiePage(document)
+//            val calculatedKey = page.rnKeyScript.calculatedKey
+//            httpClient.addCookie("RNKEY", calculatedKey,"*.pornhub.com")
+//            logger.warn("rncookie evaluated to $calculatedKey. setting as RNKEY cookie")
+//            return loadVideoPageDocument(urlString, mapOf("cookie" to "platform=pc; accessAgeDisclaimerPH=1; RNKEY=$calculatedKey"))
+//        }
 
         throw ResolveException("Document ${urlString} does not seem to be a pornhub page")
 

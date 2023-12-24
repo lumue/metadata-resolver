@@ -10,7 +10,7 @@ import org.apache.http.impl.client.CloseableHttpClient
 private val xhLoginRequestHeaders: Map<String, String> = mapOf(
         "accept" to "*/*",
         "accept-encoding" to "gzip, deflate, br",
-        "accept-language" to "de-DE,de;q=0.9,en-US;q=0.8,en;q=0.7,es;q=0.6",
+        "accept-language" to "en-US;q=0.8,en;q=0.7",
         "cache-control" to "no-cache",
         "content-type" to "text/plain",
         "pragma" to "no-cache",
@@ -20,8 +20,9 @@ private val xhLoginRequestHeaders: Map<String, String> = mapOf(
 )
 
 class XhHttpClient(
-        username: String = "",
-        password: String = ""
+    username: String = "",
+    password: String = "",
+
 ) : BasicHttpClient(
         username = username,
         password = password,
@@ -40,7 +41,11 @@ class XhHttpClient(
         hasAuthenticatedUserCall = fun(cookieStore: CookieStore): Boolean {
             return cookieStore.names().contains("UID")
         }
-)
+) {
+
+
+}
+
 
 
 

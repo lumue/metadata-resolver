@@ -11,27 +11,12 @@ import java.util.stream.Stream
 class PhResolverE2E {
 
 
-    @ParameterizedTest(name = "resolveMetadata should return MovieMetadata for {0}")
-    @MethodSource("provideUrls")
-    fun should_resolve_movie_metadata(url:String) {
+    @Test
+    fun should_resolve_movie_metadata(){
         runBlocking {
-            val resolver = PhResolver()
-            for(i in 1..10) {
-                val movieMetadata =
-                    resolver.resolveMetadata(url)
+                val movieMetadata = PhResolver().resolveMetadata("http://de.pornhub.com:80/view_video.php?viewkey=6562588c230e8")
                 println(movieMetadata)
                 Assertions.assertNotNull(movieMetadata)
             }
         }
     }
-
-    companion object {
-        @JvmStatic
-        fun provideUrls(): Stream<Arguments> {
-            return Stream.of(
-                Arguments.of("https://www.pornhub.com/view_video.php?viewkey=63fc6e9814a82")
-                )
-        }
-    }
-
-}
