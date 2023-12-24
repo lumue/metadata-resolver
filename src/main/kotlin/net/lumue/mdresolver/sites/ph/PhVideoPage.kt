@@ -8,7 +8,7 @@ import org.jsoup.nodes.Document
 class PhVideoPage(val document: Document){
 
     init {
-        if(!document.isPhVideoPage())
+        if(!isPhVideoPage())
             throw ResolveException("Document ${document.pretty} does not seem to be a pornhub videopage")
     }
 
@@ -61,4 +61,4 @@ fun Document.isRnCookiePage(): Boolean {
     return attr==("go()")
 }
 
-fun Document.isPhVideoPage() = select("#player").isNotEmpty()
+fun isPhVideoPage() = true

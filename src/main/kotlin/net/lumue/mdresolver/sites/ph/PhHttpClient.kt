@@ -6,8 +6,8 @@ class PhHttpClient(
 
 ) : BasicHttpClient(){
     init {
-        addCookie("platform", "pc", "pornhub.com")
-        addCookie("accessAgeDisclaimerPH", "1", "pornhub.com")
+        addCookie("platform", "pc", ".pornhub.com")
+        addCookie("accessAgeDisclaimerPH", "1", ".pornhub.com")
     }
 
 }

@@ -27,7 +27,6 @@ private val contentAsStringRequestHeaders: Map<String, String> = mapOf(
         "content-type" to "text/html; charset=utf-8",
         "pragma" to "no-cache",
         "user-agent" to "Mozilla/5.0 (X11; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/114.0",
-        "cookie" to "accessAgeDisclaimerPH=1; platform=pc",
         "Accept-Language" to "en-US;q=0.7,en;q=0.3"
 )
 
@@ -35,8 +34,13 @@ abstract class BasicHttpClient(
     val password: String = "",
     val username: String = "",
     private val cookieStore: CookieStore = BasicCookieStore(),
-    val performLoginHttpCall: (p: String, u: String, hc: CloseableHttpClient) -> Any=fun(_: String, _: String, _: CloseableHttpClient) {},
-    val hasAuthenticatedUserCall: (cs: CookieStore)->Boolean= fun (_: CookieStore) : Boolean{  return true}
+    val performLoginHttpCall: (p: String, u: String, hc: CloseableHttpClient) -> Any = fun(
+        _: String,
+        _: String,
+        _: CloseableHttpClient
+    ) {
+    },
+    val hasAuthenticatedUserCall: (cs: CookieStore) -> Boolean = fun(_: CookieStore): Boolean { return true }
 ) {
 
     private val logger = LoggerFactory.getLogger(BasicHttpClient::class.java)!!
@@ -70,9 +74,8 @@ abstract class BasicHttpClient(
         }
 
 
-
     private val loggingIn: AtomicBoolean = AtomicBoolean(false)
-    open suspend fun getContentAsString(urlAsString: String, additionalHeaders: Map<String,String> = mapOf()): String {
+    open suspend fun getContentAsString(urlAsString: String, additionalHeaders: Map<String, String> = mapOf()): String {
 
         if (username.isNotEmpty() && !loggedIn)
             login()
@@ -80,7 +83,7 @@ abstract class BasicHttpClient(
 
         val httpClient = httpClientBuilder.build()
 
-        return httpClient.getContentAsString(urlAsString,additionalHeaders )
+        return httpClient.getContentAsString(urlAsString, additionalHeaders)
 
     }
 
@@ -111,29 +114,27 @@ abstract class BasicHttpClient(
     }
 
 
-
-    fun addCookie( name: String, value: String, domain: String) {
+    fun addCookie(name: String, value: String, domain: String) {
         val basicClientCookie = BasicClientCookie(name, value)
-        basicClientCookie.domain=domain
-        basicClientCookie.path="/"
-        basicClientCookie.expiryDate=Date(LocalDate.now().atStartOfDay().plusDays(365).toEpochSecond(ZoneOffset.UTC))
+        basicClientCookie.domain = domain
+        basicClientCookie.path = "/"
+        basicClientCookie.expiryDate = Date(LocalDate.now().atStartOfDay().plusDays(365).toEpochSecond(ZoneOffset.UTC))
         cookieStore.addCookie(basicClientCookie)
     }
 
 
-
-
-
-    private suspend fun CloseableHttpClient.getContentAsString(url: String, additionalHeaders: Map<String, String> = mapOf()): String {
+    private suspend fun CloseableHttpClient.getContentAsString(
+        url: String,
+        additionalHeaders: Map<String, String> = mapOf()
+    ): String {
 
         return suspendCancellableCoroutine {
-            val result:String
+            val result: String
             try {
-                result=requestPageContent(url, additionalHeaders)
+                result = requestPageContent(url, additionalHeaders)
                 it.resume(result)
-            }
-            catch (e:Throwable){
-                logger.error("unexpected error getting content from $url as String ",e)
+            } catch (e: Throwable) {
+                logger.error("unexpected error getting content from $url as String ", e)
                 it.resumeWithException(e)
             }
         }
@@ -160,10 +161,10 @@ abstract class BasicHttpClient(
 
 }
 
-fun HttpGet.addHeaders(headers: Map<String,String>){
+fun HttpGet.addHeaders(headers: Map<String, String>) {
     headers.entries.stream()
-            .map { h -> BasicHeader(h.key, h.value) }
-            .forEach { h -> addHeader(h) }
+        .map { h -> BasicHeader(h.key, h.value) }
+        .forEach { h -> addHeader(h) }
 }
 
 
