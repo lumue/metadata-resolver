@@ -42,7 +42,7 @@ data class MovieMetadata(@JsonProperty("title") override val title: String,
                          @JsonProperty("source")   override val source: String? = "unknown",
                          @JsonProperty("sourceId")   override val sourceId: String? = "unknown",
                          @JsonProperty("sourceURL")   override val sourceURL: String? = "unknown",
-                         @JsonProperty("resolution") override val resolution: Short?,
+                         @JsonProperty("resolution") override val resolution: Short?=0,
                          @JsonProperty("votes")   override val votes: Int? = 0
 
 ) : VideoMetadata()

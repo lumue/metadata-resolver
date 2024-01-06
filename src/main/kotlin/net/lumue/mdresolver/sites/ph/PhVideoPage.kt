@@ -31,7 +31,8 @@ private fun Document.extractMovieMetadata(): MovieMetadata {
         source = "pornhub",
         tags = extractTags(),
         actors = extractActors(),
-        resolution = 0
+        sourceURL = metaProperty("og:url"),
+        uploader = extractChannel()
     )
 }
 
@@ -52,13 +53,26 @@ private fun Document.extractTags(): Set<Tag> {
     return  (categories+tags).filter { t-> "" != t.name }.toMutableSet()
 }
 
+private fun Document.extractChannel(): String {
+    return select(".userInfo")
+        .select(".usernameWrap")
+        .map { a -> a.text() }
+        .first()
+}
+
 private fun Document.extractTitle(): String {
-    return select("meta[property=\"og:title\"]").attr("content")
+    return this.metaProperty("og:title")
 }
 
 private fun Document.extractDescription(): String {
-    return select("meta[property=\"og:description\"]").attr("content")
+    return this.metaProperty("og:description")
 }
+
+
+private fun Document.metaProperty(metaPropertyName : String): String {
+    return select("meta[property=\"$metaPropertyName\"]").attr("content")
+}
+
 
 fun Document.isRnCookiePage(): Boolean {
     val attr = select("body").attr("onload")
