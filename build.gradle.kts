@@ -47,6 +47,7 @@ dependencies {
     implementation ("org.seleniumhq.selenium:selenium-java:4.6.0")
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")
+    testImplementation("org.assertj:assertj-core:3.16.1")
     testImplementation(kotlin("test"))
 }
 

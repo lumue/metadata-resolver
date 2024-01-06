@@ -18,7 +18,7 @@ class PhResolver : MovieMetadataResolver {
 
     override suspend fun resolveMetadata(url: String): MovieMetadata {
         logger.debug("resolving metadata for location $url")
-        val page = PhPageParser().fromHtml(httpClient.getContentAsString(url))
+        val page = PhPageParser().fromHtml(httpClient.getContentAsString(url.withGenericPhDomain()))
         return page.contentMetadata
     }
 

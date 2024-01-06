@@ -1,5 +1,6 @@
 package net.lumue.mdresolver.sites.ph
 
+import net.lumue.mdresolver.core.Actor
 import net.lumue.mdresolver.core.MovieMetadata
 import net.lumue.mdresolver.core.ResolveException
 import net.lumue.mdresolver.core.Tag
@@ -34,18 +35,21 @@ private fun Document.extractMovieMetadata(): MovieMetadata {
     )
 }
 
-private fun Document.extractActors(): Set<MovieMetadata.Actor> {
-    val actors = select(".pornstarsWrapper").select("a")
-            .map { a -> MovieMetadata.Actor(a.attr("href"), a.text()) }
+private fun Document.extractActors(): Set<Actor> {
+    val actors = select(".pornstarsWrapper")
+        .select(".pstar-list-btn")
+        .map { a -> Actor("", a.text()) }
     return actors.toMutableSet()
 }
 
 private fun Document.extractTags(): Set<Tag> {
-    val categories = select(".categoriesWrapper").select("a")
-            .map { a -> Tag(a.attr("href"), a.text()) }
-    val tags=select(".tagsWrapper").select("a")
-            .map { a -> Tag(a.attr("href"), a.text()) }
-    return  (categories+tags).filter { t-> "" != t.id }.toMutableSet()
+    val categories = select(".categoriesWrapper")
+                    .select(".item")
+                    .map { a -> Tag("", a.text()) }
+    val tags=select(".tagsWrapper")
+            .select(".item")
+            .map { a -> Tag("", a.text()) }
+    return  (categories+tags).filter { t-> "" != t.name }.toMutableSet()
 }
 
 private fun Document.extractTitle(): String {

@@ -3,6 +3,7 @@ package net.lumue.mdresolver.sites.xh
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.databind.JsonNode
+import net.lumue.mdresolver.core.Actor
 import net.lumue.mdresolver.core.MovieMetadata
 import net.lumue.mdresolver.core.Tag
 import org.jsoup.nodes.Element
@@ -220,7 +221,7 @@ data class XhVideoPage(
                 .toSet(),
             actors = videoTags
                     .filter {t-> t.attr("href").contains("/pornstars")}
-                .map { t-> MovieMetadata.Actor(t.attr("href"), t.text().trim()) }
+                .map { t-> Actor(t.attr("href"), t.text().trim()) }
                 .toSet(),
             duration = Duration.ofSeconds(this.initialsJson.videoModel.duration),
             views = this.initialsJson.videoModel.views,
@@ -247,7 +248,7 @@ data class XhVideoPage(
                 .toCollection(mutableSetOf())
         }
 
-    private val InitialsJson.VideoModel.actors: Set<MovieMetadata.Actor>
+    private val InitialsJson.VideoModel.actors: Set<Actor>
         get() {
             if(categories==null)
                 return setOf()
@@ -255,7 +256,7 @@ data class XhVideoPage(
             return categories
                 .filter { category -> category.name != null && category.url != null }
                 .filter { category -> category.pornstar }
-                .map { category -> MovieMetadata.Actor(category.url!!, category.name!!) }
+                .map { category -> Actor(category.url!!, category.name!!) }
                 .toCollection(mutableSetOf())
         }
     private val InitialsJson.VideoModel.tags: Set<Tag>

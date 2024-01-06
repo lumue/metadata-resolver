@@ -28,6 +28,8 @@ abstract class VideoMetadata : ContentMetadata() {
     abstract val resolution: Short?
 }
 
+data class Actor(@JsonProperty("id") val id: String, @JsonProperty("name") val name: String)
+
 data class MovieMetadata(@JsonProperty("title") override val title: String,
                          @JsonProperty("description") override val description: String = "",
                          @JsonProperty("tags")  override val tags: Set<Tag> = setOf(),
@@ -43,8 +45,4 @@ data class MovieMetadata(@JsonProperty("title") override val title: String,
                          @JsonProperty("resolution") override val resolution: Short?,
                          @JsonProperty("votes")   override val votes: Int? = 0
 
-) : VideoMetadata() {
-
-
-    data class Actor(@JsonProperty("id") val id: String, @JsonProperty("name") val name: String)
-}
+) : VideoMetadata()
