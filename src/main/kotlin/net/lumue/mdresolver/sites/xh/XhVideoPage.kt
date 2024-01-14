@@ -217,11 +217,11 @@ data class XhVideoPage(
             description = this.initialsJson.videoModel.description,
             tags = videoTags
                 .filter {t-> t.attr("href").contains("/categories")}
-                .map { t-> Tag(t.attr("href"),t.text().trim()) }
+                .map { t-> Tag("",t.text().trim()) }
                 .toSet(),
             actors = videoTags
                     .filter {t-> t.attr("href").contains("/pornstars")}
-                .map { t-> Actor(t.attr("href"), t.text().trim()) }
+                .map { t-> Actor("", t.text().trim()) }
                 .toSet(),
             duration = Duration.ofSeconds(this.initialsJson.videoModel.duration),
             views = this.initialsJson.videoModel.views,
